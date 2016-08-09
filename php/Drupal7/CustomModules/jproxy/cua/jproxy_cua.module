@@ -1,0 +1,480 @@
+<?php
+// $Id: jproxy_cua.module, v 0.1 2015/04/16 steven_hill_sr Exp $
+
+/**
+ * @file
+ * Current User Account information from JPROXY java application
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function jproxy_cua_menu()
+{
+    $items = array();
+
+    $items['apis'] = array(
+        'title' => 'Healtjproxy',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => TRUE,
+        'menu_name' => 'main-menu',
+        'weight' => -48,
+    );
+
+    $items['apis/patient/healtjproxy'] = array(
+        'title' => 'healtjproxy',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_is_authenticated',
+        'menu_name' => 'main-menu',
+        'weight' => -90,
+    );
+
+    $items['apis/doctor/show/<pId>'] = array(
+        'title' => 'Campaigns',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_has_provider_access',
+        'menu_name' => 'main-menu',
+        'weight' => -65,
+    );
+
+    $items['apis/provider/<pUrlSuffix>'] = array(
+        'title' => 'Provider',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_has_provider_access',
+        'menu_name' => 'main-menu',
+        'weight' => -60,
+    );
+
+    $items['apis/availabilityCalendar/viewAvailabilityCalendar'] = array(
+        'title' => 'Calendar',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_has_provider_access',
+        'menu_name' => 'main-menu',
+        'weight' => -55,
+    );
+
+    $items['apis/healthpon/redemption'] = array(
+        'title' => 'Redeem',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_has_provider_access',
+        'menu_name' => 'main-menu',
+        'weight' => -50,
+    );
+
+    $items['apis/campaign/reviewList'] = array(
+        'title' => 'Campaign Review',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_is_campaign_approver',
+        'menu_name' => 'main-menu',
+        'weight' => -49,
+    );
+
+    $items['apis/dbAdmin'] = array(
+        'title' => 'DB Admin',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_is_admin_user',
+        'menu_name' => 'main-menu',
+        'weight' => -48,
+    );
+	
+	$items['apis/reports'] = array(
+        'title' => 'Reports',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_is_admin_provider',
+        'menu_name' => 'main-menu',
+        'weight' => -48,
+    );
+	
+	$items['apis/concierge'] = array(
+        'title' => 'Cnocierge Onboarding',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_is_admin_user',
+        'menu_name' => 'main-menu',
+        'weight' => -48,
+    );
+	
+	$items['apis/conciergeprovider'] = array(
+        'title' => 'Concierge Provider',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_is_admin_user',
+        'menu_name' => 'main-menu',
+        'weight' => -48,
+    );
+	
+
+    $items['apis/transactions'] = array(
+        'title' => 'Transactions',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_is_admin_user',
+        'menu_name' => 'main-menu',
+        'weight' => -47,
+    );
+
+    $items['apis/jobs/view'] = array(
+        'title' => 'Jobs',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_is_admin_user',
+        'menu_name' => 'main-menu',
+        'weight' => -46,
+    );
+	
+	
+	
+
+	
+    $items['apis/account'] = array(
+        'title' => 'My Account',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_is_authenticated',
+        'menu_name' => 'main-menu',
+        'weight' => 0,
+    );
+
+    $items['apis/practice/report'] = array(
+        'title' => 'Reports',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_has_provider_access',
+        'menu_name' => 'main-menu',
+        'weight' => 10,
+    );
+
+    $items['apis/doctor/terms'] = array(
+        'title' => 'Provider Terms of Use',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_has_provider_access',
+        'menu_name' => 'main-menu',
+        'weight' => 11,
+    );
+
+    $items['apis/about/feedback'] = array(
+        'title' => 'Feedback',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => TRUE,
+        'menu_name' => 'main-menu',
+        'weight' => 20,
+    );
+
+    $items['apis/contactsupport'] = array(
+        'title' => 'Customer Support',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => TRUE,
+        'menu_name' => 'main-menu',
+        'weight' => 30,
+    );
+
+    $items['apis/termsOfUse<privacypolicy>'] = array(
+        'title' => 'Privacy Policy',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => TRUE,
+        'menu_name' => 'main-menu',
+        'weight' => 31,
+    );
+
+    $items['apis/termsOfUse<returnpolicy>'] = array(
+        'title' => 'Return Policy',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => TRUE,
+        'menu_name' => 'main-menu',
+        'weight' => 32,
+    );
+
+    $items['apis/termsOfUse'] = array(
+        'title' => 'Patient Terms of Use',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => TRUE,
+        'menu_name' => 'main-menu',
+        'weight' => 49,
+    );
+
+    $items['playlogout'] = array(
+        'title' => 'Logout',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_is_authenticated',
+        'menu_name' => 'main-menu',
+        'weight' => -15,
+    );
+
+    $items['playaccess'] = array(
+        'title' => 'Login/Register',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_is_anonymous',
+        'menu_name' => 'main-menu',
+        'weight' => -15,
+    );
+
+    $items['playcart'] = array(
+        'title' => 'Cart',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => TRUE,
+        'menu_name' => 'main-menu',
+        'weight' => -25,
+        'options' => array('attributes'=>array('id'=>array('main-menu-cart-link'))),
+    );
+
+    $items['playdirectory'] = array(
+        'title' => 'Directory',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => TRUE,
+        'menu_name' => 'main-menu',
+        'weight' => -25,
+        'options' => array('attributes'=>array('id'=>array('main-menu-cart-link'))),
+    );
+
+    $items['playinvite'] = array(
+        'title' => 'Invite',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => '_jproxy_apis',
+        'access callback' => '_cur_user_is_authenticated',
+        'menu_name' => 'main-menu',
+        'weight' => -30,
+        'options' => array('attributes'=>array('id'=>array('main-menu-cart-link'))),
+    );
+
+    $items ['ops/heartbeat'] = array(
+        'title' => 'Heartbeat',
+        'page callback' => '_heartbeat',
+        'access arguments' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
+
+    return $items;
+}
+
+function _heartbeat() {
+    return "THIS JPROXY APPLICATION PAGE IS UP";
+}
+
+/**
+ * Implements hook_menu_link_alter().
+ */
+function jproxy_cua_menu_link_alter(&$item, $menu)
+{
+    if ($item['module'] == 'system' && $item['link_title'] == 'Healtjproxy') {
+        if ($item['link_title'] == 'Healtjproxy' && $item['link_path'] == 'apis') {
+            $item['options']['alter'] = TRUE;
+            $item['options']['unaltered_hidden'] = $item['hidden'];
+            $item['options']['external'] = TRUE;
+        } else {
+            unset($item['options']['unaltered_hidden']);
+            $item['options']['external'] = (url_is_external($item['link_path'])) ? 1 : 0;
+        }
+    }
+    if ($item['link_path'] == 'apis/termsOfUse<returnpolicy>') {
+        $item['options']['alter'] = TRUE;
+    }
+    if ($item['link_path'] == 'apis/termsOfUse<privacypolicy>') {
+        $item['options']['alter'] = TRUE;
+    }
+    if ($item['link_path'] == 'apis/cart') {
+        $item['options']['alter'] = TRUE;
+    }
+    if ($item['link_path'] == 'apis/provider/<pUrlSuffix>') {
+        $item['options']['alter'] = TRUE;
+    }
+    if ($item['link_path'] == 'apis/doctor/show/<pId>') {
+        $item['options']['alter'] = TRUE;
+    }
+    if ($item['link_path'] == 'playcart') {
+        $item['options']['alter'] = TRUE;
+    }
+    if ($item['link_path'] == 'playdirectory') {
+        $item['options']['alter'] = TRUE;
+    }
+    if ($item['link_path'] == 'playinvite') {
+        $item['options']['alter'] = TRUE;
+    }
+    if ($item['link_path'] == 'playaccess') {
+        $item['options']['alter'] = TRUE;
+    }
+    if ($item['link_path'] == 'playlogout') {
+        $item['options']['alter'] = TRUE;
+    }
+    if ($item['link_path'] == 'node/17') {
+        $item['options']['alter'] = TRUE;
+    }
+    if ($item['menu_name'] == 'main-menu') {
+        error_log("menu item link_title: " . $item['link_title']);
+    }
+}
+
+/**
+ * Implements hook_translated_menu_link_alter().
+ */
+function jproxy_cua_translated_menu_link_alter(&$item, $map)
+{
+    // only try to change the one we added above in hook_menu
+    if ($item['module'] == 'system' && $item['link_title'] == 'Healtjproxy') {
+        $href = $item['href'];
+
+        /**
+         * Sets variable matching for menu items.
+         */
+        if ($item['link_title'] == 'Healtjproxy' && $item['link_path'] == 'apis') {
+            $item['options']['alter'] = TRUE;
+            $item['options']['external'] = TRUE;
+
+            if ($item['link_path'] == 'apis') {
+                $href = variable_get('void_menu_link_value', 'javascript: void(0);');
+            }
+        } else {
+            unset($item['options']['unaltered_hidden']);
+            $item['options']['external'] = (url_is_external($item['link_path'])) ? 1 : 0;
+        }
+
+        $item['href'] = $href;
+
+    }
+
+    if ($item['link_path'] == 'apis/termsOfUse<returnpolicy>') {
+        $item['href'] = 'apis/termsOfUse';
+        $item['localized_options']['fragment'] = 'returnpolicy';
+    }
+    if ($item['link_path'] == 'apis/termsOfUse<privacypolicy>') {
+        $item['href'] = 'apis/termsOfUse';
+        $item['localized_options']['fragment'] = 'privacypolicy';
+    }
+    if ($item['link_path'] == 'apis/cart') {
+        $cartCount = _load_jproxyCartCount();
+        $item['title'] = 'Cart'; //: '; // . $cartCount . " items";
+    }
+    if ($item['link_path'] == 'apis/doctor/show/<pId>') {
+        $cua = _load_jproxyCua();
+        $item['href'] = 'apis/doctor/show/' . $cua->providerId;
+    }
+    if ($item['link_path'] == 'apis/provider/<pUrlSuffix>') {
+        $cua = _load_jproxyCua();
+        $item['href'] = 'apis/provider/' . $cua->providerUrlSuffix;
+    }
+    if ($item['link_path'] == 'playcart') {
+        $item['href'] = 'apis/cart';
+        $item['plid'] = 0;
+    }
+    if ($item['link_path'] == 'playdirectory') {
+        $item['href'] = 'apis/state/all-states';
+        $item['plid'] = 0;
+    }
+    if ($item['link_path'] == 'playinvite') {
+        $item['href'] = 'apis/invitePatient';
+        $item['plid'] = 0;
+    }
+    if ($item['link_path'] == 'playaccess') {
+        $item['href'] = 'apis/access';
+        $item['plid'] = 0;
+    }
+    if ($item['link_path'] == 'playlogout') {
+        $cua = _load_jproxyCua();
+        $item['href'] = 'apis/logout';
+        $item['title'] = 'Logout (' . substr($cua->displayName,0,8) . ')';
+        $item['plid'] = 0;
+    }
+    if ($item['link_path'] == 'node/17') {
+        global $user;
+        error_log("Go Pages menu item: " . print_r($item,1));
+        error_log("Go Pages menu item - user roles: " . print_r($user->roles,1));
+    }
+}
+
+function _load_jproxyCua()
+{
+    module_load_include('inc', 'jproxy_cua', 'jproxy_cua.class');
+    return jproxyCua::getInstance();
+}
+
+function _load_jproxyCartCount()
+{
+    $cp = dirname(drupal_get_path('module','jproxy_cua'));    require_once($cp . '/jproxy.rest.inc');
+    $rest = new jproxyRest;
+
+    $rest->setSecret(jproxy_get_jproxy_webservice_secretkey());
+    $rest->setBaseurl(jproxy_get_rest_server());
+    $rest->setService('');
+    $rest->setModule('rest');
+    $rest->setAction('getCartCount');
+
+    // standard filters
+    $rest->setRequestKey('apikey', jproxy_get_jproxy_webservice_accesskey());
+    //     $rest->setRequestKey('apikey', "unauthorized-test");
+    $rest->setRequestKey('format', 'json');
+    //   $rest->setRequestKey('session_id', $this->sessionId);
+
+    $rest->setMethod('post');
+
+
+    $rest->setMethod('get');
+
+    $content = $rest->call();
+
+    return $content['cartcount'];
+}
+
+/**
+ * Empty callback ensures Drupal menu system accepts Void placeholders.
+ */
+function _jproxy_apis()
+{
+    return drupal_not_found();
+}
+
+function _cur_user_is_authenticated()
+{
+    $cua = _load_jproxyCua();
+    $ret = ($cua->anonymous != 1) ? TRUE : FALSE;
+    return $ret;
+}
+
+function _cur_user_is_anonymous()
+{
+    $cua = _load_jproxyCua();
+    $ret = ($cua->anonymous == 1) ? TRUE : FALSE;
+    return $ret;
+}
+
+function _cur_user_has_provider_access()
+{
+    $cua = _load_jproxyCua();
+    return $cua->practiceProvider;
+}
+
+function _cur_user_is_admin_user()
+{
+    $cua = _load_jproxyCua();
+    return $cua->adminUser;
+}
+
+function _cur_user_is_campaign_approver()
+{
+    $cua = _load_jproxyCua();
+    return $cua->campaignApprover;
+}
+
+function _cur_user_is_admin_provider()
+{
+    $cua = _load_jproxyCua();
+    return $cua->adminUser.$cua->practiceProvider;
+}
+

@@ -1,0 +1,11 @@
+name = JPROXY
+description = JPROXY java application virtual folder proxy
+core = 7.x
+package = jproxy
+
+#dependencies[] = 
+
+#files[] = 
+
+#configure = 
+

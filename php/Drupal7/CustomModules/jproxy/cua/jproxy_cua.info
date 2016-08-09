@@ -1,0 +1,11 @@
+name = JPROXY Current User Account
+description = Current User Account from JPROXY java application
+core = 7.x
+package = JPROXY
+
+dependencies[] = jproxy
+
+#files[] =
+
+#configure =
+

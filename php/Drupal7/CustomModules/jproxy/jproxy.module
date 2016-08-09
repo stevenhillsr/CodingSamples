@@ -1,0 +1,20 @@
+<?php
+// $Id: jproxy.module, v 0.1 2015/04/16 steven_hill_sr Exp $
+
+/**
+ * @file
+ * JPROXY java application virtual folder proxie
+ */
+
+function jproxy_menu() {
+  $items = array();
+
+  $items['apis/%menu_tail'] = array(
+    'title' => 'JPROXY Virtual Folder', 
+    'page callback' => 'jproxy_view', 
+    'access callback' => TRUE,
+    'load arguments' => array('%map', '%index'), 
+  );
+
+  return $items;
+}
