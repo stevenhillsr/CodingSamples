@@ -1,0 +1,123 @@
+#!/bin/bash
+
+# phpSelect - this script creates a symbolic link in the user's ${HOME_BIN} directory
+#             it depends on this directory existing and being the first item in the $(PATH}
+#             environment variable.
+#
+#             It is suggested that this script be placed in your ${PATH} allowing it to be run from anywhere
+#
+#             The link points to a version of php from the MAMP install
+#               OR to the system installed version of php found on the path (excluding the ${HOME_BIN} path)
+#
+#             At the time this script was created, MAMP would let you "install" various versions of php for use
+#             in the MAMP environment, but those were not exposed to the host operating system (OS/X in my case)
+#             so trying to do things from a system prompt on projects in the MAMP environment results in a version
+#             mismatch. This script lets you easily syncronize the version called from a system prompt with that 
+#             used in the project. It also lets you "revert" back to the system installed version if that applies.
+#
+#        This was created for use on OS/X and would not like work with MAMP's Window's version.
+#
+#        One would suppose that other virtual environments like XAMP would work simularly and this script could
+#        be modified to work with them.
+#
+#             It is possible to use this script as a basis for establishing sym-links to other commands
+#
+# author: Steven Hill Sr (www<dot>stevenhillsr<dot>com)
+#
+# license: Unlicensed <http://unlicense.org>
+#
+
+# "phpSelect help" should produce a list of available versions to choose from
+
+# "phpSelect system" will create link to system installed version if there is one, if not produces list of MAMP versions
+
+# if there are no versions of php on the system, either under MAMP or on the path, then you get not found message with empty list to choose from
+#     so if you think that it is not working, then
+# uncomment next line for debug...
+#set -x
+
+HOME_BIN=$(ls -d ~/bin)
+
+# look for a system installed version of php
+# Replace colons with spaces to create list.
+for dir in ${PATH//:/ }; do
+    # capture first location in path
+	if test -z ${FIRST_PATH}
+	then
+		FIRST_PATH=${dir};
+	fi
+    if test "${dir}" != "${HOME_BIN}"
+    then
+	    PHP_BINARY="${dir}/php"
+		if test ! -d $PHP_BINARY -a -x $PHP_BINARY
+		then
+			SYS_PHP_BINARY=$PHP_BINARY
+			break
+		fi
+	fi
+done
+
+# verify that {HOME_BIN} is first location in path
+if test "${FIRST_PATH}" != "${HOME_BIN}"
+then
+	echo "${HOME_BIN} not first item in path! This script will not work properly."
+	exit
+fi
+
+
+MAMP_PATH="/Applications/MAMP/bin/php";
+
+# find the highest version of php within MAMP
+for mamp in $(ls $MAMP_PATH); do
+    PHP_BINARY="${MAMP_PATH}/${mamp}/bin/php"
+	if test ! -d $PHP_BINARY -a -x $PHP_BINARY
+	then
+		# strip off the 'php' at beginning - depends on naming being php<version>
+		HIGHEST_MAMP_VERSION=${mamp#php}
+	fi
+done
+
+# what version did user ask for?
+PHP_VERSION=$1
+
+# check for no specific request and set to MAMP if available or else system
+if test -z "${PHP_VERSION}"
+then
+  if test -z "${HIGHEST_MAMP_VERSION}"
+  then
+  	PHP_VERSION="system"
+  else
+  	PHP_VERSION="${HIGHEST_MAMP_VERSION}";
+  fi
+fi
+
+
+# determine binary file to use
+if test "${PHP_VERSION}" == "system"
+then
+  PHP_BINARY="${SYS_PHP_BINARY}";
+else
+  PHP_BINARY="${MAMP_PATH}/php${PHP_VERSION}/bin/php";
+fi
+
+# check that the binary does exist and set sym-link to it OR report error
+if test ! -d "${PHP_BINARY}" -a -x "${PHP_BINARY}"
+then
+  rm ${HOME_BIN}/php
+  ln -s ${PHP_BINARY} ${HOME_BIN}/php
+  echo "Setting php to version ${PHP_VERSION}"
+else
+  echo "PHP version ${PHP_VERSION} not found, please chose one of these: (do not include 'php' - ie. php5.1.6 is version 5.1.6"
+  echo
+  echo
+  ls ${MAMP_PATH}
+  if test ! -z $SYS_PHP_BINARY
+  then
+    echo
+    echo
+    echo "    OR choose 'system' to use the system installed version of php"
+  fi
+fi
+
+echo
+echo
